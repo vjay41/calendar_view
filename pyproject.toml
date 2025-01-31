@@ -1,0 +1,22 @@
+[project]
+name = "calendar-view"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "vijayakumar.ragunathan@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask (>=3.1.0,<4.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "openpyxl (>=3.1.5,<4.0.0)",
+    "xlsxwriter (>=3.2.2,<4.0.0)"
+]
+
+[virtualenvs]
+in-project = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
