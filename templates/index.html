@@ -46,7 +46,14 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log("Fetched events:", data); // Debugging: Log fetched events
-                        successCallback(data);
+                        // Map the data to the format expected by FullCalendar
+                        const events = data.map(event => ({
+                            title: event.asset_name, // or another field for the title
+                            start: event.start_time,
+                            end: event.end_time,
+                            description: event.description // Optional: for additional info
+                        }));
+                        successCallback(events);
                     })
                     .catch(error => {
                         console.error("Error fetching events:", error); // Debugging: Log errors
