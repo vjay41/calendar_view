@@ -40,6 +40,15 @@
             z-index: 1000;
             border-radius: 5px;
         }
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #333;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +78,7 @@
         </div>
     </div>
     <div id="calendar"></div>
+    <div id="loading" style="display: none;">Loading...</div> <!-- Loading message -->
 
 <!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
@@ -82,6 +92,7 @@
         var deploymentFilter = document.getElementById('deployment-filter');
         var environmentFilter = document.getElementById('environment-filter');
         var locationFilter = document.getElementById('location-filter');
+        var loadingEl = document.getElementById('loading');
 
         function fetchEvents() {
             var deploymentId = deploymentFilter.value;
@@ -99,6 +110,7 @@
 
         function fetchLocations() {
             var deploymentId = deploymentFilter.value;
+            loadingEl.style.display = 'block'; // Show loading
             fetch(`/unique-locations?deployment_id=${deploymentId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -109,8 +121,12 @@
                         option.textContent = location;
                         locationFilter.appendChild(option);
                     });
+                    loadingEl.style.display = 'none'; // Hide loading
                 })
-                .catch(error => console.error("Error fetching locations:", error));
+                .catch(error => {
+                    console.error("Error fetching locations:", error);
+                    loadingEl.style.display = 'none'; // Hide loading
+                });
         }
 
         // Function to generate a random color
@@ -144,6 +160,7 @@
                 var deploymentId = deploymentFilter.value;
                 var environment = environmentFilter.value;
                 var location = locationFilter.value;
+                loadingEl.style.display = 'block'; // Show loading
                 fetch(`/events?start=${fetchInfo.start.toISOString()}&end=${fetchInfo.end.toISOString()}&deployment_id=${deploymentId}&environment=${environment}&location=${location}`)
                     .then(response => response.json())
                     .then(data => {
@@ -167,10 +184,12 @@
                             };
                         });
                         successCallback(events);
+                        loadingEl.style.display = 'none'; // Hide loading
                     })
                     .catch(error => {
                         console.error("Error fetching events:", error);
                         failureCallback(error);
+                        loadingEl.style.display = 'none'; // Hide loading
                     });
             },
             eventMouseEnter: function(info) {
@@ -179,10 +198,9 @@
                     <strong>${event.title}</strong><br>
                     <strong>Application:</strong> ${event.extendedProps.application_name}<br>
                     <strong>Function:</strong> ${event.extendedProps.asset_function}<br>
+                    <strong>Seal/Deployment ID:</strong> ${event.extendedProps.seal_id}:${event.extendedProps.deployment_id}<br>
                     <strong>Type:</strong> ${event.extendedProps.event_type}<br>
                     <strong>Description:</strong> ${event.extendedProps.description}<br>
-                    <strong>Seal ID:</strong> ${event.extendedProps.seal_id}<br>
-                    <strong>Deployment ID:</strong> ${event.extendedProps.deployment_id}<br>
                     <strong>Location:</strong> ${event.extendedProps.location}
                 `;
                 tooltip.innerHTML = content;
