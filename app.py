@@ -12,9 +12,9 @@ DB_NAME = 'emms_db'
 DB_USER = 'nco'
 DB_PASSWORD = 'nco'
 
-# Create a SQLAlchemy engine
+# Create a SQLAlchemy engine with connection pooling
 DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
-engine = create_engine(DATABASE_URI)
+engine = create_engine(DATABASE_URI, pool_size=5, max_overflow=0)
 
 def get_patching_schedule(start=None, end=None):
     query = """
