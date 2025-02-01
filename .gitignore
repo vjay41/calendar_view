@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+poetry.lock
 
 # C extensions
 *.so
@@ -34,3 +35,15 @@ ENV/
 env.bak/
 venv.bak/
 
+# IntelliJ IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode
+.vscode/
+
+# Poetry
+poetry.lock
+*.toml
