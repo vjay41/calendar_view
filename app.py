@@ -104,8 +104,8 @@ def export_to_excel():
     start_str = request.args.get('start')
     end_str = request.args.get('end')
 
-    start_datetime = validate_date(start_str).to_pydatetime()
-    end_datetime = validate_date(end_str).to_pydatetime()
+    start_datetime = validate_date(start_str)
+    end_datetime = validate_date(end_str)
 
     start_datetime = start_datetime.replace(microsecond=0)
     end_datetime = end_datetime.replace(microsecond=0)
@@ -150,6 +150,14 @@ def unique_locations():
     except Exception as e:
         app.logger.error(f"Error fetching unique locations: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+def validate_date(date_str):
+    try:
+        # Parse the date string using dateutil.parser.parse
+        parsed_date = parse(date_str)
+        return parsed_date
+    except ValueError:
+        raise ValueError(f"Invalid date format: {date_str}. Expected format: ISO 8601 (e.g., YYYY-MM-DDTHH:MM:SS.sssZ).")
 
 if __name__ == '__main__':
     app.run(debug=True)
