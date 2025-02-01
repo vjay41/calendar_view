@@ -35,3 +35,15 @@ ENV/
 env.bak/
 venv.bak/
 
+# IntelliJ IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode
+.vscode/
+
+# Poetry
+poetry.lock
+*.toml
