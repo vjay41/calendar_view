@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, send_file, jsonify
 import pandas as pd
 from io import BytesIO
-
-import psycopg2
-from psycopg2 import pool
+from sqlalchemy import create_engine
 from dateutil.parser import parse
 
 app = Flask(__name__)
@@ -14,27 +12,17 @@ DB_NAME = 'emms_db'
 DB_USER = 'nco'
 DB_PASSWORD = 'nco'
 
-# Initialize a connection pool
-connection_pool = psycopg2.pool.SimpleConnectionPool(
-    1,  # Minimum number of connections
-    5,  # Maximum number of connections
-    host=DB_HOST,
-    database=DB_NAME,
-    user=DB_USER,
-    password=DB_PASSWORD
-)
+# Create a SQLAlchemy engine
+DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
+engine = create_engine(DATABASE_URI)
 
 def get_patching_schedule(start=None, end=None):
-    conn = connection_pool.getconn()
-    try:
-        query = """
-            SELECT * FROM patching_schedule 
-            WHERE (%s IS NULL OR start_time >= %s)
-            AND (%s IS NULL OR end_time <= %s)
-        """
-        df = pd.read_sql(query, conn, params=(start, start, end, end))
-    finally:
-        connection_pool.putconn(conn)
+    query = """
+        SELECT * FROM patching_schedule 
+        WHERE (%s IS NULL OR start_time >= %s)
+        AND (%s IS NULL OR end_time <= %s)
+    """
+    df = pd.read_sql(query, engine, params=(start, start, end, end))
     return df
 
 # Load patching schedule from PostgreSQL
