@@ -11,13 +11,23 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        h1 {
+            text-align: center; /* Center-align the heading */
+        }
         #calendar {
             max-width: 900px;
             margin: 0 auto;
         }
-        .export-button, .filters {
-            text-align: center;
-            margin: 20px;
+        .controls {
+            display: flex;
+            justify-content: space-between; /* Space between the dropdowns and the button */
+            align-items: center;
+            margin: 20px auto; /* Center the controls */
+            max-width: 900px; /* Match the calendar width */
+        }
+        .filters {
+            display: flex;
+            gap: 10px; /* Add some space between the dropdowns */
         }
         .tooltip {
             position: absolute;
@@ -33,30 +43,32 @@
     </style>
 </head>
 <body>
-<h1>Server Patching Schedule</h1>
-<div class="filters">
-    <label for="deployment-filter">Deployment ID:</label>
-    <select id="deployment-filter">
-        <option value="">All</option>
-        <!-- Options will be populated dynamically -->
-    </select>
-    <label for="environment-filter">Environment:</label>
-    <select id="environment-filter">
-        <option value="">All</option>
-        <option value="PROD">PROD</option>
-        <option value="UAT">UAT</option>
-        <option value="DEV">DEV</option>
-    </select>
-    <label for="location-filter">Location:</label>
-    <select id="location-filter">
-        <option value="">All</option>
-        <!-- Options will be populated dynamically -->
-    </select>
-</div>
-<div class="export-button">
-    <a id="export-link" href="#" class="btn">Export to Excel</a>
-</div>
-<div id="calendar"></div>
+    <h1>Server Patching Schedule</h1>
+    <div class="controls">
+        <div class="filters">
+            <label for="deployment-filter">Deployment ID:</label>
+            <select id="deployment-filter">
+                <option value="">All</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+            <label for="environment-filter">Environment:</label>
+            <select id="environment-filter">
+                <option value="">All</option>
+                <option value="PROD">PROD</option>
+                <option value="UAT">UAT</option>
+                <option value="DEV">DEV</option>
+            </select>
+            <label for="location-filter">Location:</label>
+            <select id="location-filter">
+                <option value="">All</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+        </div>
+        <div class="export-button">
+            <a id="export-link" href="#" class="btn">Export to Excel</a>
+        </div>
+    </div>
+    <div id="calendar"></div>
 
 <!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
