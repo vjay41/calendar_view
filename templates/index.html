@@ -15,14 +15,44 @@
             max-width: 900px;
             margin: 0 auto;
         }
-        .export-button {
+        .export-button, .filters {
             text-align: center;
             margin: 20px;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 <h1>Server Patching Schedule</h1>
+<div class="filters">
+    <label for="deployment-filter">Deployment ID:</label>
+    <select id="deployment-filter">
+        <option value="">All</option>
+        <!-- Options will be populated dynamically -->
+    </select>
+    <label for="environment-filter">Environment:</label>
+    <select id="environment-filter">
+        <option value="">All</option>
+        <option value="PROD">PROD</option>
+        <option value="UAT">UAT</option>
+        <option value="DEV">DEV</option>
+    </select>
+    <label for="location-filter">Location:</label>
+    <select id="location-filter">
+        <option value="">All</option>
+        <!-- Options will be populated dynamically -->
+    </select>
+</div>
 <div class="export-button">
     <a id="export-link" href="#" class="btn">Export to Excel</a>
 </div>
@@ -33,6 +63,57 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+        var tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+
+        var deploymentFilter = document.getElementById('deployment-filter');
+        var environmentFilter = document.getElementById('environment-filter');
+        var locationFilter = document.getElementById('location-filter');
+
+        function fetchEvents() {
+            var deploymentId = deploymentFilter.value;
+            var environment = environmentFilter.value;
+            var location = locationFilter.value;
+            calendar.refetchEvents();
+        }
+
+        deploymentFilter.addEventListener('change', function() {
+            fetchLocations();  // Update locations based on selected Deployment ID
+            fetchEvents();
+        });
+        environmentFilter.addEventListener('change', fetchEvents);
+        locationFilter.addEventListener('change', fetchEvents);
+
+        function fetchLocations() {
+            var deploymentId = deploymentFilter.value;
+            fetch(`/unique-locations?deployment_id=${deploymentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    locationFilter.innerHTML = '<option value="">All</option>';  // Reset options
+                    data.forEach(location => {
+                        var option = document.createElement('option');
+                        option.value = location;
+                        option.textContent = location;
+                        locationFilter.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error fetching locations:", error));
+        }
+
+        // Function to generate a random color
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Object to store colors for each Deployment_ID
+        var deploymentColors = {};
+
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             headerToolbar: {
@@ -41,36 +122,83 @@
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             events: function(fetchInfo, successCallback, failureCallback) {
-                // Fetch events based on the visible date range
-                fetch(`/events?start=${fetchInfo.start.toISOString()}&end=${fetchInfo.end.toISOString()}`)
+                var deploymentId = deploymentFilter.value;
+                var environment = environmentFilter.value;
+                var location = locationFilter.value;
+                fetch(`/events?start=${fetchInfo.start.toISOString()}&end=${fetchInfo.end.toISOString()}&deployment_id=${deploymentId}&environment=${environment}&location=${location}`)
                     .then(response => response.json())
                     .then(data => {
-                        console.log("Fetched events:", data); // Debugging: Log fetched events
-                        // Map the data to the format expected by FullCalendar
-                        const events = data.map(event => ({
-                            title: event.asset_name, // or another field for the title
-                            start: event.start_time,
-                            end: event.end_time,
-                            description: event.description // Optional: for additional info
-                        }));
+                        const events = data.map(event => {
+                            // Assign a color to each Deployment_ID
+                            if (!deploymentColors[event.deployment_id]) {
+                                deploymentColors[event.deployment_id] = getRandomColor();
+                            }
+                            return {
+                                title: `${event.asset_name} (${event.application_name})`,
+                                start: event.start_time,
+                                end: event.end_time,
+                                description: event.description,
+                                application_name: event.application_name,
+                                asset_function: event.asset_function,
+                                event_type: event.event_type,
+                                seal_id: event.seal_id,
+                                deployment_id: event.deployment_id,
+                                location: event.location,
+                                color: deploymentColors[event.deployment_id]
+                            };
+                        });
                         successCallback(events);
                     })
                     .catch(error => {
-                        console.error("Error fetching events:", error); // Debugging: Log errors
+                        console.error("Error fetching events:", error);
                         failureCallback(error);
                     });
             },
+            eventMouseEnter: function(info) {
+                var event = info.event;
+                var content = `
+                    <strong>${event.title}</strong><br>
+                    <strong>Application:</strong> ${event.extendedProps.application_name}<br>
+                    <strong>Function:</strong> ${event.extendedProps.asset_function}<br>
+                    <strong>Type:</strong> ${event.extendedProps.event_type}<br>
+                    <strong>Description:</strong> ${event.extendedProps.description}<br>
+                    <strong>Seal ID:</strong> ${event.extendedProps.seal_id}<br>
+                    <strong>Deployment ID:</strong> ${event.extendedProps.deployment_id}<br>
+                    <strong>Location:</strong> ${event.extendedProps.location}
+                `;
+                tooltip.innerHTML = content;
+                tooltip.style.display = 'block';
+                tooltip.style.left = info.jsEvent.pageX + 10 + 'px';
+                tooltip.style.top = info.jsEvent.pageY + 10 + 'px';
+            },
+            eventMouseLeave: function(info) {
+                tooltip.style.display = 'none';
+            },
             datesSet: function(info) {
-                // Update the export link with the current date range
                 const exportLink = document.getElementById('export-link');
                 exportLink.href = `/export?start=${info.start.toISOString()}&end=${info.end.toISOString()}`;
             }
         });
         calendar.render();
 
-        // Initialize the export link with the current date range
         const exportLink = document.getElementById('export-link');
         exportLink.href = `/export?start=${calendar.view.activeStart.toISOString()}&end=${calendar.view.activeEnd.toISOString()}`;
+
+        // Fetch unique Deployment_IDs for the filter
+        fetch('/unique-deployment-ids')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(id => {
+                    var option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    deploymentFilter.appendChild(option);
+                });
+            })
+            .catch(error => console.error("Error fetching deployment IDs:", error));
+
+        // Initial fetch for locations
+        fetchLocations();
     });
 </script>
 </body>
