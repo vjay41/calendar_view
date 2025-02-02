@@ -203,7 +203,9 @@
                     <strong>Seal/Deployment ID:</strong> ${event.extendedProps.seal_id}:${event.extendedProps.deployment_id}<br>
                     <strong>Type:</strong> ${event.extendedProps.event_type}<br>
                     <strong>Description:</strong> ${event.extendedProps.event_description}<br>
-                    <strong>Location:</strong> ${event.extendedProps.event_location}
+                    <strong>Location:</strong> ${event.extendedProps.event_location}<br>
+                    <strong>Start:</strong> ${event.start.toISOString()}<br> <!-- Access start directly -->
+                    <strong>End:</strong> ${event.end.toISOString()} <!-- Access end directly -->
                 `;
                 tooltip.innerHTML = content;
                 tooltip.style.display = 'block';
