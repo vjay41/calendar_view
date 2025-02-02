@@ -39,11 +39,8 @@ venv.bak/
 *.iml
 *.ipr
 *.iws
-.idea/
 
 # VSCode
-.vscode/
 
 # Poetry
-poetry.lock
 *.toml
