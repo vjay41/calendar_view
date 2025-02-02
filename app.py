@@ -139,6 +139,16 @@ def unique_locations():
         app.logger.error(f"Error fetching unique locations: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
+@app.route('/application-name', methods=['GET'])
+def get_application_name():
+    deployment_id = request.args.get('deployment_id')
+    if deployment_id:
+        result = patching_schedule[patching_schedule['deployment_id'] == deployment_id]
+        if not result.empty:
+            application_name = result.iloc[0]['application_name']
+            return jsonify({'application_name': application_name})
+    return jsonify({'application_name': 'N/A'})
+
 def validate_date(date_str):
     try:
         # Parse the date string using dateutil.parser.parse

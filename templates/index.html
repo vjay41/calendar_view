@@ -55,8 +55,8 @@
     <h1>Server Patching Schedule</h1>
     <div class="controls">
         <div class="filters">
-            <label for="deployment-filter">Deployment ID:</label>
-            <select id="deployment-filter">
+            <label for="deployment-id-filter">Application:</label>
+            <select id="deployment-id-filter">
                 <option value="">All</option>
                 <!-- Options will be populated dynamically -->
             </select>
@@ -89,7 +89,7 @@
         tooltip.className = 'tooltip';
         document.body.appendChild(tooltip);
 
-        var deploymentFilter = document.getElementById('deployment-filter');
+        var deploymentFilter = document.getElementById('deployment-id-filter');
         var environmentFilter = document.getElementById('environment-filter');
         var locationFilter = document.getElementById('location-filter');
         var loadingEl = document.getElementById('loading');
