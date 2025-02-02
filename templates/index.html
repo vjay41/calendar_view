@@ -55,9 +55,9 @@
     <h1>Server Patching Schedule</h1>
     <div class="controls">
         <div class="filters">
-            <label for="deployment-id-filter">Application:</label>
+            <label for="deployment-id-filter">Deployment ID:</label>
             <select id="deployment-id-filter">
-                <option value="">All</option>
+                <option value="">Select Deployment ID</option>
                 <!-- Options will be populated dynamically -->
             </select>
             <label for="environment-filter">Environment:</label>
@@ -76,6 +76,9 @@
         <div class="export-button">
             <a id="export-link" href="#" class="btn">Export to Excel</a>
         </div>
+    </div>
+    <div id="application-name-display">
+        <strong>Application Name:</strong> <span id="application-name"></span>
     </div>
     <div id="calendar"></div>
     <div id="loading" style="display: none;">Loading...</div> <!-- Loading message -->
@@ -240,6 +243,37 @@
 
         // Initial fetch for locations
         fetchLocations();
+
+        var deploymentIdFilter = document.getElementById('deployment-id-filter');
+        var applicationNameDisplay = document.getElementById('application-name');
+
+        // Populate the Deployment ID dropdown with options
+        fetch('/deployment-ids')
+            .then(response => response.json())
+            .then(deploymentIds => {
+                deploymentIds.forEach(id => {
+                    var option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    deploymentIdFilter.appendChild(option);
+                });
+            });
+
+        // Add event listener for Deployment ID filter change
+        deploymentIdFilter.addEventListener('change', function() {
+            var selectedDeploymentId = deploymentIdFilter.value;
+
+            if (selectedDeploymentId) {
+                // Fetch the application name for the selected Deployment ID
+                fetch(`/application-name?deployment_id=${selectedDeploymentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        applicationNameDisplay.textContent = data.application_name || 'N/A';
+                    });
+            } else {
+                applicationNameDisplay.textContent = '';
+            }
+        });
     });
 </script>
 </body>
