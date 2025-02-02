@@ -173,13 +173,14 @@
                                 title: `${event.asset_name} (${event.application_name})`,
                                 start: event.start_time,
                                 end: event.end_time,
-                                description: event.description,
+                                environment_type: event.environment_type,
+                                event_description: event.event_description,
                                 application_name: event.application_name,
                                 asset_function: event.asset_function,
                                 event_type: event.event_type,
                                 seal_id: event.seal_id,
                                 deployment_id: event.deployment_id,
-                                location: event.location,
+                                event_location: event.event_location,
                                 color: deploymentColors[event.deployment_id]
                             };
                         });
@@ -197,11 +198,12 @@
                 var content = `
                     <strong>${event.title}</strong><br>
                     <strong>Application:</strong> ${event.extendedProps.application_name}<br>
+                    <strong>Environment:</strong> ${event.extendedProps.environment_type}<br>
                     <strong>Function:</strong> ${event.extendedProps.asset_function}<br>
                     <strong>Seal/Deployment ID:</strong> ${event.extendedProps.seal_id}:${event.extendedProps.deployment_id}<br>
                     <strong>Type:</strong> ${event.extendedProps.event_type}<br>
-                    <strong>Description:</strong> ${event.extendedProps.description}<br>
-                    <strong>Location:</strong> ${event.extendedProps.location}
+                    <strong>Description:</strong> ${event.extendedProps.event_description}<br>
+                    <strong>Location:</strong> ${event.extendedProps.event_location}
                 `;
                 tooltip.innerHTML = content;
                 tooltip.style.display = 'block';

@@ -19,17 +19,17 @@ cursor = conn.cursor()
 
 # Drop the table if it exists and recreate it with the updated schema
 cursor.execute("""
-    DROP TABLE IF EXISTS patching_schedule;
-    CREATE TABLE patching_schedule (
+    DROP TABLE IF EXISTS emms_events_calendar_view;
+    CREATE TABLE emms_events_calendar_view (
         seal_id VARCHAR(255),
         deployment_id VARCHAR(255),
         application_name VARCHAR(255),
         asset_name VARCHAR(255),
-        environment VARCHAR(255),
-        location VARCHAR(255),  -- Moved location after environment
+        environment_type VARCHAR(255),
+        event_location VARCHAR(255),  -- Moved location after environment
         asset_function VARCHAR(255),
         event_type VARCHAR(255),
-        description VARCHAR(255),
+        event_description VARCHAR(255),
         start_time TIMESTAMP,
         end_time TIMESTAMP
     );
@@ -60,9 +60,9 @@ for _ in range(100):
 
     # Insert the record into the database
     cursor.execute("""
-        INSERT INTO patching_schedule (
-            seal_id, deployment_id, application_name, asset_name, environment,
-            location, asset_function, event_type, description, start_time, end_time
+        INSERT INTO emms_events_calendar_view (
+            seal_id, deployment_id, application_name, asset_name, environment_type,
+            event_location, asset_function, event_type, event_description, start_time, end_time
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (seal_id, deployment_id, application_name, asset_name, environment,
           location, asset_function, event_type, description, start_time, end_time))

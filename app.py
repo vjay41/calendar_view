@@ -19,7 +19,7 @@ engine = create_engine(DATABASE_URI, pool_size=5, max_overflow=0)
 
 def get_patching_schedule(start=None, end=None):
     query = """
-        SELECT * FROM patching_schedule 
+        SELECT * FROM emms_events_calendar_view 
         WHERE (%s IS NULL OR start_time >= %s)
         AND (%s IS NULL OR end_time <= %s)
     """
@@ -53,7 +53,7 @@ def get_events():
         start_str = request.args.get('start')
         end_str = request.args.get('end')
         deployment_id = request.args.get('deployment_id')
-        environment = request.args.get('environment')
+        environment_type = request.args.get('environment')  # Update variable name
 
         start = pd.to_datetime(start_str).to_datetime64()
         end = pd.to_datetime(end_str).to_datetime64()
@@ -66,8 +66,8 @@ def get_events():
         if deployment_id:
             filtered_events = filtered_events[filtered_events['deployment_id'] == deployment_id]
 
-        if environment:
-            filtered_events = filtered_events[filtered_events['environment'] == environment]
+        if environment_type:  # Update condition
+            filtered_events = filtered_events[filtered_events['environment_type'] == environment_type]  # Update column name
 
         events = filtered_events.to_dict('records')
         for event in events:
@@ -77,10 +77,10 @@ def get_events():
             event['asset_name'] = event['asset_name']
             event['asset_function'] = event['asset_function']
             event['event_type'] = event['event_type']
-            event['description'] = event['description']
+            event['event_description'] = event['event_description']
             event['start_time'] = event['start_time'].isoformat()
             event['end_time'] = event['end_time'].isoformat()
-            event['location'] = event['location']  # Include location
+            event['event_location'] = event['event_location']  # Include location
 
         return jsonify(events)
     except Exception as e:
@@ -133,7 +133,7 @@ def unique_locations():
         else:
             filtered_schedule = patching_schedule
 
-        unique_locations = sorted(filtered_schedule['location'].unique().tolist(), key=str)
+        unique_locations = sorted(filtered_schedule['event_location'].unique().tolist(), key=str)
         return jsonify(unique_locations)
     except Exception as e:
         app.logger.error(f"Error fetching unique locations: {str(e)}")
